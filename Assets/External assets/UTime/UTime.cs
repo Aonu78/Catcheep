@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Networking;
 
     public class UTime : MonoBehaviour
     {
@@ -20,13 +21,13 @@ using UnityEngine;
         public void GetUtcTimeAsync(Action<bool, string, DateTime> callback)
         {
             Debug.Log("Requesting network time from: " + TimeServer);
-            Instance.StartCoroutine(Download(TimeServer, www =>
+            StartCoroutine(Download(TimeServer, www =>
                 {
-                    if (www.error == null)
+                    if (www.result == UnityWebRequest.Result.Success)
                     {
                         try
                         {
-                            callback(true, null, DateTime.Parse(www.text).ToUniversalTime());
+                            callback(true, null, DateTime.Parse(www.downloadHandler.text).ToUniversalTime());
                         }
                         catch (Exception e)
                         {
@@ -47,16 +48,17 @@ using UnityEngine;
         public void HasConnection(Action<bool> callback)
         {
             
-                Instance.StartCoroutine(Download(TimeServer, www => { callback(www.error == null); }));
+                StartCoroutine(Download(TimeServer, www => { callback(www.result == UnityWebRequest.Result.Success); }));
             
         }
 
-        private IEnumerator Download(string url, Action<WWW> callback)
+        private IEnumerator Download(string url, Action<UnityWebRequest> callback)
         {
-            var www = new WWW(url);
-
-            yield return www;
-
-            callback(www);
+            using (var request = UnityWebRequest.Get(url))
+            {
+                request.timeout = 5;
+                yield return request.SendWebRequest();
+                callback(request);
+            }
         }
     }

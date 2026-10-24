@@ -12,10 +12,13 @@ public class OpeningSceneScript : MonoBehaviour
     public string[] hints;
 
 	// Use this for initialization
-	void Start ()
+    IEnumerator Start ()
 	{
 	    GameObject.Find("Music Manager").GetComponent<PlayServicesMyVersion>().signIn();
-        Text.GetComponent<TextMeshProUGUI>().text = hints[Random.Range(0,hints.Length)];
+        // The persistent services initialize before authentication is requested.
+        yield return null;
+        if (Text != null && hints != null && hints.Length > 0)
+            Text.GetComponent<TextMeshProUGUI>().text = hints[Random.Range(0,hints.Length)];
             StartCoroutine(opening());
     }
 	

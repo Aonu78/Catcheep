@@ -1,17 +1,17 @@
-﻿using GooglePlayGames;
+#if UNITY_ANDROID
+using GooglePlayGames;
 using GooglePlayGames.BasicApi;
-using UnityEngine.SocialPlatforms;
+#endif
 using UnityEngine;
 
 public class PlayServicesMyVersion : MonoBehaviour {
 
 	// Use this for initialization
-	void Start () {
-		PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().Build();
+	void Awake () {
+#if UNITY_ANDROID && !UNITY_EDITOR
 	    PlayGamesPlatform.DebugLogEnabled = true;
-        PlayGamesPlatform.InitializeInstance(config);
 	    PlayGamesPlatform.Activate();
-	    GooglePlayGames.OurUtils.Logger.DebugLogEnabled = true;
+#endif
 	}
 
     public void SignInCallback(bool success)
@@ -28,46 +28,64 @@ public class PlayServicesMyVersion : MonoBehaviour {
 
     public void signIn()
     {
-        if (!Social.localUser.authenticated)
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if (!PlayGamesPlatform.Instance.localUser.authenticated)
         {
             // Sign in with Play Game Services, showing the consent dialog
             // by setting the second parameter to isSilent=false.
             print("call back...");
-            Social.localUser.Authenticate(SignInCallback);
+            PlayGamesPlatform.Instance.Authenticate(status => SignInCallback(status == SignInStatus.Success));
         }
         else
         {
             print("already In");
         }
+#endif
 
     }
     
 
     public void unlockAchievement(string id)
     {
-        Social.ReportProgress(id, 100, succes => { print("achievement unlocked !"); });
+        unlockPartialAchievement(id, 100);
     }
 
     public void unlockPartialAchievement(string id, double pourcentage)
     {
-        Social.ReportProgress(id,pourcentage,succes => {print("achievement partialy unlocked !");});
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if (PlayGamesPlatform.Instance.localUser.authenticated)
+            PlayGamesPlatform.Instance.ReportProgress(id, pourcentage, success => { });
+#endif
     }
 
     public bool showAchievementUI()
     {
-        Social.ShowAchievementsUI();
-        return Social.localUser.authenticated;
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if (!PlayGamesPlatform.Instance.localUser.authenticated) { signIn(); return false; }
+        PlayGamesPlatform.Instance.ShowAchievementsUI();
+        return true;
+#else
+        return false;
+#endif
     }
 
     public void addValueToLeaderbord(string id, int score)
     {
-        Social.ReportScore(score, id, succes => {print("score added to leaderbord");});
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if (PlayGamesPlatform.Instance.localUser.authenticated)
+            PlayGamesPlatform.Instance.ReportScore(score, id, success => { });
+#endif
     }
 
     public bool showLeaderbordUI()
     {
-        Social.ShowLeaderboardUI();
-        return Social.localUser.authenticated;
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if (!PlayGamesPlatform.Instance.localUser.authenticated) { signIn(); return false; }
+        PlayGamesPlatform.Instance.ShowLeaderboardUI();
+        return true;
+#else
+        return false;
+#endif
     }
 
     public void showQuest()

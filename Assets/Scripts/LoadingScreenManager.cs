@@ -35,14 +35,15 @@ public class LoadingScreenManager : MonoBehaviour
 	AsyncOperation operation;
 	Scene currentScene;
 
-	public static int sceneToLoad;
+	public static int sceneToLoad = -1;
 	// IMPORTANT! This is the build index of your loading scene. You need to change this to match your actual scene index
-	static int loadingSceneIndex;
+	const int loadingSceneIndex = 4;
 
 	public static void LoadScene(int levelNum) {				
 		Application.backgroundLoadingPriority = ThreadPriority.High;
 		sceneToLoad = levelNum;
-		SceneManager.LoadScene(sceneToLoad);
+		Time.timeScale = 1f;
+		SceneManager.LoadScene(loadingSceneIndex);
 	}
 
 	void Start() {
@@ -87,8 +88,9 @@ public class LoadingScreenManager : MonoBehaviour
 			if (Mathf.Approximately(operation.progress, lastProgress) == false) {
 				progressBar.fillAmount = operation.progress;
 				lastProgress = operation.progress;
-			    yield return new WaitForSeconds(0.1f);
             }
+		    // Progress can remain unchanged for several frames. Always yield.
+		    yield return null;
 		}
 
 		if (loadSceneMode == LoadSceneMode.Additive)

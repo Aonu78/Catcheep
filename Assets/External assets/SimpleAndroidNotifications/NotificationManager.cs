@@ -1,5 +1,8 @@
 ﻿using System;
 using UnityEngine;
+#if UNITY_ANDROID
+using Unity.Notifications.Android;
+#endif
 
 #if UNITY_ANDROID && !UNITY_EDITOR
 
@@ -69,15 +72,13 @@ namespace Assets.SimpleAndroidNotifications
         {
             #if UNITY_ANDROID && !UNITY_EDITOR
 
-            var p = notificationParams;
-            var delay = (long) p.Delay.TotalMilliseconds;
-
-            new AndroidJavaClass(FullClassName).CallStatic("SetNotification", p.Id, delay, p.Title, p.Message, p.Ticker,
-                p.Sound ? 1 : 0, p.Vibrate ? 1 : 0, p.Light ? 1 : 0, p.LargeIcon, GetSmallIconName(p.SmallIcon), ColotToInt(p.SmallIconColor), MainActivityClassName);
+            var host = new GameObject("Notification Permission");
+            UnityEngine.Object.DontDestroyOnLoad(host);
+            host.AddComponent<CatcheepNotificationDispatcher>().Send(notificationParams);
 
             #else
 
-            Debug.LogWarning("Simple Android Notifications are not supported for current platform. Build and play this scene on android device!");
+            // Notifications are optional on desktop and in the editor.
 
             #endif
 
@@ -91,7 +92,7 @@ namespace Assets.SimpleAndroidNotifications
         {
             #if UNITY_ANDROID && !UNITY_EDITOR
 
-            new AndroidJavaClass(FullClassName).CallStatic("CancelNotification", id);
+            AndroidNotificationCenter.CancelNotification(id);
 
             #endif
         }
@@ -103,7 +104,7 @@ namespace Assets.SimpleAndroidNotifications
         {
             #if UNITY_ANDROID && !UNITY_EDITOR
 
-            new AndroidJavaClass(FullClassName).CallStatic("CancelAllNotifications");
+            AndroidNotificationCenter.CancelAllNotifications();
 
             #endif
         }

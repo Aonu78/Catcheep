@@ -1,10 +1,11 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Globalization;
 using Assets.Scripts;
 using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using UnityEngine.Advertisements;
+using Catcheep.Services;
+using Advertisement = Catcheep.Services.GameAds;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -131,7 +132,9 @@ public class gameManager : MonoBehaviour
                 combo = 0;
                 StartCoroutine(flareMaker(0.45f));
                 StartCoroutine(GameObject.Find("Help Manager").GetComponent<helpManager>().errorCall());
+#if UNITY_ANDROID || UNITY_IOS
                 if (PlayerPrefs.GetString("Vibration") == "True") Handheld.Vibrate();
+#endif
             }
 
             if (catchedSomething)
@@ -601,7 +604,7 @@ public class gameManager : MonoBehaviour
 
     public void ShowAd()
     {
-        if (Advertisement.IsReady())
+        if (Advertisement.IsReady("video"))
         {
             Advertisement.Show();
         }

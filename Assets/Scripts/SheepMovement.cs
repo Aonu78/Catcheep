@@ -26,7 +26,7 @@ public class SheepMovement : MonoBehaviour
         setDestination();
 
         //jst to use the same script for other objects that dnt need it really
-        if (SheepDestroyer == null) SheepDestroyer = new sheepDestroyer();
+        if (SheepDestroyer == null) SheepDestroyer = GetComponent<sheepDestroyer>();
 
         if (tag == "blacky") StartCoroutine(suddenChangeInDirection());
     }
@@ -36,7 +36,7 @@ public class SheepMovement : MonoBehaviour
     {
         if (helpTool == null)
         {
-            if (!SheepDestroyer.caught)
+            if (SheepDestroyer == null || !SheepDestroyer.caught)
             {
                 switch (gameObject.tag)
                 {
@@ -53,7 +53,7 @@ public class SheepMovement : MonoBehaviour
             }
             else
             {
-               GetComponent<Rigidbody2D>().velocity = new Vector2(0f, 0f);
+               GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
             }
         }
         else

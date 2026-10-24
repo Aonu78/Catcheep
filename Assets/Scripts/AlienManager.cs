@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Globalization;
 using Assets.Scripts;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Advertisements;
+using Catcheep.Services;
+using Advertisement = Catcheep.Services.GameAds;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 

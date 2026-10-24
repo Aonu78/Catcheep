@@ -1,5 +1,7 @@
 # Catcheep 
 
+Open the project in **Unity 6000.6.4f1**, open **Assets/Opening.unity**, and press Play. See [Unity 6 migration and verification](UNITY6-MIGRATION.md) for build commands and service setup details.
+
 ![GitHub license](https://img.shields.io/github/license/oussamabonnor1/Catcheep.svg)
 ![Jetlight studio](https://img.shields.io/badge/Made%20by-Jetlight%20studio-blue.svg?color=082544)
 

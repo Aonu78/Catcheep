@@ -380,7 +380,9 @@ public class startMenuManager : MonoBehaviour
             (int) sceneContent.transform.localPosition.x != 0)
         {
             musicManager.UISFX(1);
+#if UNITY_ANDROID || UNITY_IOS
             Handheld.Vibrate();
+#endif
         }
         else
         {

@@ -1,9 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using Assets.Scripts;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class sheepDestroyer : MonoBehaviour
 {
@@ -20,12 +21,9 @@ public class sheepDestroyer : MonoBehaviour
     public CircleCollider2D smallCollider;
     public Collider2D BigCollider;
 
-    private Touch touchHolder;
-    private float[] timeOfTouch;
 
     void Start()
     {
-        timeOfTouch = new float[2];
         caught = false;
         sheepsCaughtText = GameObject.Find("sheeps caught");
         scoreText = GameObject.Find("score");
@@ -36,91 +34,44 @@ public class sheepDestroyer : MonoBehaviour
 
     void Update()
     {
-        /*if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
-
-            if (tag != "group")
-            {
-                if (hit.collider == smallCollider && hit.collider.transform == transform)
-                {
-                    if (gameObject.tag.Equals("sick"))
-                    { 
-                        sickClicked();
-                    }
-                    else
-                    {
-                        // raycast hit this gameobject
-                        gameManager.catchedSomething = true;
-                        sheepClicked();
-                    }
-                }
-            }
-
-            if (tag == "group")
-            {
-                if (hit.collider == BigCollider)
-                {
-                    gameManager.catchedSomething = true;
-                    obstacleClicked(hit.collider.gameObject);
-                }
-            }
-        }*/
-        if (Input.touchCount < 3 && Input.touchCount > 0 && !gameManager.pukeShowed)
+        if (!caught && !gameManager.gameOver && !gameManager.pukeShowed && Time.timeScale > 0f)
         {
             foreach (Touch touch in Input.touches)
             {
-                if (touch.phase == TouchPhase.Began)
-                {
-                    timeOfTouch[touch.fingerId] = 0;
-                }
-                if (touch.phase == TouchPhase.Stationary || touch.phase == TouchPhase.Moved)
-                {
-                    timeOfTouch[touch.fingerId] += Time.deltaTime;
-                }
-
-                if (timeOfTouch[touch.fingerId] <= 0.042)
-                {
-                    Ray ray = Camera.main.ScreenPointToRay(touch.position);
-                    RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
-
-                    if (tag != "group")
-                    {
-                        if (hit.collider == smallCollider && hit.collider.transform == transform)
-                        {
-                            if(PlayerPrefs.GetInt("SFX") == 0 ) GetComponent<AudioSource>().Play();
-                            if (gameObject.tag.Equals("sick"))
-                            {
-                                sickClicked();
-                            }
-                            else
-                            {
-                                // raycast hit this gameobject
-                                gameManager.catchedSomething = true;
-                                sheepClicked();
-                            }
-                        }
-                    }
-
-                    if (tag == "group")
-                    {
-                        if (hit.collider == BigCollider)
-                        {
-                            gameManager.catchedSomething = true;
-                            obstacleClicked(hit.collider.gameObject);
-                        }
-                    }
-                }
-                if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
-                {
-                    timeOfTouch[touch.fingerId] = 0;
-                }
+                if (touch.phase == TouchPhase.Began) TryCatch(touch.position, touch.fingerId);
             }
+            if (Input.touchCount == 0 && Input.GetMouseButtonDown(0))
+                TryCatch(Input.mousePosition, -1);
         }
         if (caught)
         {
             transform.position = Vector3.Lerp(transform.position, sheepCage.transform.position, Time.deltaTime * speed);
+        }
+    }
+
+    private void TryCatch(Vector2 screenPosition, int pointerId)
+    {
+        if (caught || Camera.main == null) return;
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(pointerId)) return;
+        Ray ray = Camera.main.ScreenPointToRay(screenPosition);
+        RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
+        if (hit.collider == null) return;
+        if (CompareTag("group"))
+        {
+            if (hit.collider != BigCollider) return;
+            gameManager.catchedSomething = true;
+            obstacleClicked(hit.collider.gameObject);
+        }
+        else if (hit.collider == smallCollider && hit.collider.transform == transform)
+        {
+            var source = GetComponent<AudioSource>();
+            if (PlayerPrefs.GetInt("SFX") == 0 && source != null) source.Play();
+            if (CompareTag("sick")) sickClicked();
+            else
+            {
+                gameManager.catchedSomething = true;
+                sheepClicked();
+            }
         }
     }
 
